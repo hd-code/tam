@@ -62,7 +62,7 @@ CREATE TABLE department (
 );
 
 CREATE TABLE empHistory (
-    id          int             NOT NULL    PRIMARY KEY     IDENTITY(1,1)
+    id          int             NOT NULL    PRIMARY KEY IDENTITY(1,1)
 ,   employee    int             NOT NULL    -- FOREIGN KEY REFERENCES employee(id)
 ,   department  int             NOT NULL    -- FOREIGN KEY REFERENCES departments(id)
 ,   job         int             NOT NULL    -- FOREIGN KEY REFERENCES job(id)
@@ -75,7 +75,7 @@ CREATE TABLE empHistory (
 );
 
 CREATE TABLE employee (
-    id          int             NOT NULL    PRIMARY KEY
+    id          int             NOT NULL    PRIMARY KEY IDENTITY(1,1)
 ,   fname       varchar(30)     NOT NULL
 ,   lname       varchar(50)     NOT NULL
 ,   email       varchar(100)    NOT NULL    UNIQUE  DEFAULT 'f.lname@tam.com'
@@ -83,6 +83,7 @@ CREATE TABLE employee (
 ,   dob         date            NOT NULL
 ,   address     int             NOT NULL    -- FOREIGN KEY REFERENCES address(id)
 );
+--> auto increment  für id ??
 
 CREATE TABLE job (
     id          int         PRIMARY KEY   IDENTITY(1,1)
@@ -101,7 +102,7 @@ CREATE TABLE leavetime (
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- TODO: PH checken nach Attributen --------------------------------------------
-CREATE TABLE "order" (
+CREATE TABLE [order] (
     id                  int         NOT NULL    PRIMARY KEY IDENTITY(1,1)
 ,   customer            int         NOT NULL    -- FOREIGN KEY REFERENCES customer(id)
 ,   no                  char(24)    NOT NULL    -- Bestellnummer
@@ -116,7 +117,7 @@ CREATE TABLE "order" (
 
 CREATE TABLE payment (
     id          int         NOT NULL    PRIMARY KEY IDENTITY(1,1)
-,   "order"     int         NOT NULL    FOREIGN KEY REFERENCES "order"(id)
+,   [order]     int         NOT NULL    FOREIGN KEY REFERENCES [order](id)
 ,   method      varchar(10) NOT NULL    CHECK(method IN ('Vorkasse','Rechnung'))
 ,   deadline    date        NOT NULL
 ,   date        date
@@ -127,7 +128,7 @@ CREATE TABLE payment (
 --------------------------------------------------------------------------------
 CREATE TABLE shipping (
     id      int         NOT NULL    PRIMARY KEY IDENTITY(1,1)
-,   "order" int         NOT NULL    FOREIGN KEY REFERENCES "order"(id)
+,   [order] int         NOT NULL    FOREIGN KEY REFERENCES [order](id)
 ,   date    date    
 ,   shipper varchar(50) NOT NULL
 ,   no      varchar(20) NOT NULL
@@ -161,14 +162,14 @@ o Datum des Zahlungseingangs o Zahl- bzw. Mahnstatus
 --------------------------------------------------------------------------------
 
 CREATE TABLE orderItems (
-    "order"     int             NOT NULL    -- FOREIGN KEY REFERENCES "order"(id)
+    [order]     int             NOT NULL    -- FOREIGN KEY REFERENCES [order](id)
 ,   product     int             NOT NULL    -- FOREIGN KEY REFERENCES product(id)
 ,   itemNo      int             NOT NULL    -- Bestellposition
 ,   qty         int             NOT NULL        
 ,   actPrice    decimal(6,2)    NOT NULL    -- tatsächliche genommener Preis
 ,   qtyDiscount int                         -- Mengenrabatt
 
-,   PRIMARY KEY ("order",product)
+,   PRIMARY KEY ([order],product)
 );
 --> itemNo   -> no ???
 
@@ -275,11 +276,11 @@ ALTER TABLE job             ADD FOREIGN KEY (salgrade)    REFERENCES salgrade(id
 
 ALTER TABLE leavetime       ADD FOREIGN KEY (employee)    REFERENCES employee(id);
 
-ALTER TABLE "order"         ADD FOREIGN KEY (customer)    REFERENCES customer(id);
-ALTER TABLE "order"         ADD FOREIGN KEY (billAddress) REFERENCES address(id);
-ALTER TABLE "order"         ADD FOREIGN KEY (shipAddress) REFERENCES address(id);
+ALTER TABLE [order]         ADD FOREIGN KEY (customer)    REFERENCES customer(id);
+ALTER TABLE [order]         ADD FOREIGN KEY (billAddress) REFERENCES address(id);
+ALTER TABLE [order]         ADD FOREIGN KEY (shipAddress) REFERENCES address(id);
 
-ALTER TABLE orderItems      ADD FOREIGN KEY ("order")     REFERENCES "order"(id);
+ALTER TABLE orderItems      ADD FOREIGN KEY ([order])     REFERENCES [order](id);
 ALTER TABLE orderItems      ADD FOREIGN KEY (product)     REFERENCES product(id);
 
 ALTER TABLE prodCat         ADD FOREIGN KEY (prodGroup)   REFERENCES prodGroup(id);
