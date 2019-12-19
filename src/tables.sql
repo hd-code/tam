@@ -43,20 +43,17 @@ CREATE TABLE contact (
 );
 
 CREATE TABLE customer (
-    id              int             NOT NULL    PRIMARY KEY IDENTITY(1,1)
-,   name            varchar(50)     NOT NULL
-,   creditlimit     decimal(6,2)    NOT NULL    DEFAULT 500
-,   rating          int             NOT NULL    DEFAULT 3   -- FOREIGN KEY REFERENCES rating(id)
-,   yearlyDiscount  int             NOT NULL    DEFAULT 0   CHECK(yearlyDiscount <= 100)
-,   contact         int             NOT NULL                -- FOREIGN KEY REFERENCES contact(id)
-,   billAddress     int             NOT NULL                -- FOREIGN KEY REFERENCES address(id)
-,   shipAddress     int                                     -- FOREIGN KEY REFERENCES address(id)
+    id          int             NOT NULL    PRIMARY KEY IDENTITY(1,1)
+,   no          char(9)         NOT NULL    CHECK(no LIKE '[A-Z][A-Z]-[A-Z][A-Z]-[0-9][0-9][0-9]')
+,   name        varchar(50)     NOT NULL
+,   contact     int             NOT NULL                -- FOREIGN KEY REFERENCES contact(id)
+,   billAddress int             NOT NULL                -- FOREIGN KEY REFERENCES address(id)
+,   shipAddress int                                     -- FOREIGN KEY REFERENCES address(id)
+,   rating      int             NOT NULL    DEFAULT 3   -- FOREIGN KEY REFERENCES rating(id)
+,   creditlimit decimal(6,2)    NOT NULL    DEFAULT 500
+,   yDiscount   int                         CHECK(yDiscount BETWEEN 0 AND 100)
 );
-
--- > yearly discount!
--- Kunden mit einem Jahresumsatz ab 20.000 $ (immer gerechnet vom
--- 1.1. -31.12. eines Jahres) erhalten für das gesamte Folgejahr einen
--- Zusatzrabatt von 1%, oder 2% ab einem Jahresumsatz von 50.000$.
+--> FRAGE: Kundennummer -> anstatt id ???
 
 CREATE TABLE department (
     id      int         PRIMARY KEY
@@ -101,13 +98,66 @@ CREATE TABLE leavetime (
 ,   reason      char    NOT NULL        CHECK(reason IN ('I','V'))
 );
 
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 -- TODO: PH checken nach Attributen --------------------------------------------
 CREATE TABLE "order" (
-    id      int         NOT NULL    PRIMARY KEY IDENTITY(1,1)
-,   date    datetime    NOT NULL    DEFAULT CURRENT_TIMESTAMP
-,   billAddress int     NOT NULL    -- FOREIGN KEY REFERENCES address(id)
-,   shipAddress int                 -- FOREIGN KEY REFERENCES address(id)
+    id                  int         NOT NULL    PRIMARY KEY IDENTITY(1,1)
+,   customer            int         NOT NULL    -- FOREIGN KEY REFERENCES customer(id)
+,   no                  char(24)    NOT NULL    -- Bestellnummer
+--> CHECK constraint???
+,   date                datetime    NOT NULL    DEFAULT CURRENT_TIMESTAMP
+,   billAddress         int         NOT NULL    -- FOREIGN KEY REFERENCES address(id)
+,   shipAddress         int                     -- FOREIGN KEY REFERENCES address(id)
+,   customerDiscount    int -- Der yDiscount vom Customer ???
+,   specDiscount        int -- Spezialrabett nur für diese Bestellung ???
+-- Payment ???
 );
+
+CREATE TABLE payment (
+    id          int         NOT NULL    PRIMARY KEY IDENTITY(1,1)
+,   "order"     int         NOT NULL    FOREIGN KEY REFERENCES "order"(id)
+,   method      varchar(10) NOT NULL    CHECK(method IN ('Vorkasse','Rechnung'))
+,   deadline    date        NOT NULL
+,   date        date
+,   status      int         NOT NULL    CHECK(status BETWEEN 1 AND 4)
+);
+--> status??? selbst berechenen??  oder nur flag,  ausgelagerte tabelle ??
+
+--------------------------------------------------------------------------------
+CREATE TABLE shipping (
+    id      int         NOT NULL    PRIMARY KEY IDENTITY(1,1)
+,   "order" int         NOT NULL    FOREIGN KEY REFERENCES "order"(id)
+,   date    date    
+,   shipper varchar(50) NOT NULL
+,   no      varchar(20) NOT NULL
+,   price   decimal(6,2) NOT NULL
+);
+-- Sollen mehrere Shippings für eine Order möglich sein ??? */
+--------------------------------------------------------------------------------
+
+/*
+o Kundennummer
+o Bestellnummer 
+o Bestelldatum
+o Versanddatum
+o Logistiker
+o Sendungsnummer
+o Rechnungsadresse
+o Lieferadresse falls abweichend
+o Versandkosten
+o Rechnungsbetrag mit Einzelpositionen
+    o Artikelbezeichnung
+    o Menge
+    o tatsächlicher Preis
+    o evtl. Mengenrabatt
+o evtl. Zusatzrabatt
+o evtl. Sonderrabatt
+o Zahlweise
+o Datum des Zahlungseingangs o Zahl- bzw. Mahnstatus
+*/
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 
 CREATE TABLE orderItems (
@@ -116,14 +166,11 @@ CREATE TABLE orderItems (
 ,   itemNo      int             NOT NULL    -- Bestellposition
 ,   qty         int             NOT NULL        
 ,   actPrice    decimal(6,2)    NOT NULL    -- tatsächliche genommener Preis
---,   discount  TODO: Check PH
+,   qtyDiscount int                         -- Mengenrabatt
 
 ,   PRIMARY KEY ("order",product)
 );
-
-CREATE TABLE payment (
-    id      int NOT NULL    PRIMARY KEY IDENTITY(1,1)
-);
+--> itemNo   -> no ???
 
 CREATE TABLE prodCat (
     id          int         NOT NULL    PRIMARY KEY     IDENTITY(1,1)
@@ -140,14 +187,11 @@ CREATE TABLE prodGroup (
 
 CREATE TABLE product (
     id          int             NOT NULL    PRIMARY KEY IDENTITY(1,1)
-,   prodCat     int             NOT NULL    -- FOREIGN KEY REFERENCES prodCat(id)
-,   vendor      int             NOT NULL    -- FOREIGN KEY REFERENCES vendor(id)
 ,   descrip     varchar(50)     NOT NULL        
 ,   stdPrice    decimal(6,2)    NOT NULL        
-,   nValue      int             --   Nährwert in kJ, nur für FOOD-Produkte  
---,   type        varchar(2)      NOT NULL    CHECK (type IN ('F','NF')) 
-                                            -- F: FOOD, NF: NONFOOD
---> Redundant!! Kann über prodCat in prodGroup ermittelt werden!!!!! 
+,   prodCat     int             NOT NULL    -- FOREIGN KEY REFERENCES prodCat(id)
+,   nValue      int                         -- Nährwert in kJ, nur für FOOD-Produkte  
+,   vendor      int             NOT NULL    -- FOREIGN KEY REFERENCES vendor(id)
 ,   createdAt   datetime        NOT NULL    DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -159,20 +203,22 @@ CREATE TABLE productAllergen (
 );
 
 CREATE TABLE purchase (
-    id      int     NOT NULL    PRIMARY KEY IDENTITY(1,1)
-,   date    date    NOT NULL    -- Bestelldatum
-,   ingoing date                -- Wareneingangsdatum
+    id          int     NOT NULL    PRIMARY KEY IDENTITY(1,1)
+,   date        date    NOT NULL    -- Bestelldatum
+,   arrivedOn   date                -- Wareneingangsdatum
 );
+--> arrivedOn  besserer Name ???
 
 CREATE TABLE purchItems (
     purchase    int             NOT NULL    -- FOREIGN KEY REFERENCES purchase(id)
 ,   product     int             NOT NULL    -- FOREIGN KEY REFERENCES product(id)
-,   itemNo      int             NOT NULL    -- Bestellposition
+,   itemNo      int             NOT NULL    -- Bestellposition 
 ,   qty         int             NOT NULL        
 ,   price       decimal(6,2)    NOT NULL    -- Einkaufspreis
 
 ,   PRIMARY KEY (purchase,product)
 );
+--> itemNo steht nicht im PH !!!!
 
 CREATE TABLE ranking (
     id      int NOT NULL    PRIMARY KEY IDENTITY(1,1)
@@ -193,12 +239,6 @@ CREATE TABLE salgrade (
 ,   hisal   decimal(7,2)
 );
 
-CREATE TABLE shipping (
-    id      int     NOT NULL    PRIMARY KEY IDENTITY(1,1)
-,   date    date
-,
-);
-
 CREATE TABLE vendor (
     id          int             NOT NULL    PRIMARY KEY     IDENTITY(1,1)
 ,   name        varchar(50)     NOT NULL
@@ -211,9 +251,9 @@ CREATE TABLE warehouse (
     id          int     NOT NULL    PRIMARY KEY IDENTITY(1,1)
 ,   product     int     NOT NULL    -- FOREIGN KEY REFERENCES product(id)    
 ,   stock       int     NOT NULL      
-,   bestBefore  date    --   Verbrauchsdatum, nur für FOOD-Produkte
+,   bestBefore  date                --   Verbrauchsdatum, nur für FOOD-Produkte
 );
---> minStock ???
+--> minStock ???   id/no id ????
 
 GO -----------------------------------------------------------------------------
 
@@ -235,6 +275,7 @@ ALTER TABLE job             ADD FOREIGN KEY (salgrade)    REFERENCES salgrade(id
 
 ALTER TABLE leavetime       ADD FOREIGN KEY (employee)    REFERENCES employee(id);
 
+ALTER TABLE "order"         ADD FOREIGN KEY (customer)    REFERENCES customer(id);
 ALTER TABLE "order"         ADD FOREIGN KEY (billAddress) REFERENCES address(id);
 ALTER TABLE "order"         ADD FOREIGN KEY (shipAddress) REFERENCES address(id);
 
