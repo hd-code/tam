@@ -10,7 +10,7 @@ Im Terminal dann folgendes ausführen:
 
 ```bash
 # 1. das Repo clonen
-git clone https://source.ai.fh-erfurt.de/ha9384dr/tam-mssql
+git clone https://source.ai.fh-erfurt.de/ha9384dr/tam-mssql.git
 
 # 2. in den Ordner wechseln
 cd tam-mssql
