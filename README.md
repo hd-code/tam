@@ -6,17 +6,19 @@ Dieses Projekt enthält das Dockerfile sowie alle nötigen SQL-Skripte, um die D
 
 Docker muss installiert und aktiv sein. Ansonsten gibt es keine weiteren Voraussetzungen.
 
-1. Dieses Repo auf den Rechner herunterladen
-2. Terminal in diesem Ordner öffnen
-3. Docker Image 'tam' bauen, mittels:
+Im Terminal dann folgendes ausführen:
 
 ```bash
+# 1. das Repo clonen
+git clone https://source.ai.fh-erfurt.de/ha9384dr/tam-mssql
+
+# 2. in den Ordner wechseln
+cd tam-mssql
+
+# 3. Docker Image 'tam' bauen, mittels:
 docker build -t tam .
-```
 
-4. gebautes Docker Image auf Port 1433 starten:
-
-```bash
+# 4. gebautes Docker Image auf Port 1433 starten:
 docker run -p 1433:1433 tam
 ```
 
@@ -30,4 +32,6 @@ Benötigte Software dazu sind:
 - MS-SQL Server (2017er Version)
 - MS-SQL Management Studio (>= v18)
 
-Um nun die Datenbank zu installieren muss lediglich im MS-SQL Management Studio das SQL-Skript 'tables.sql' im Ordner `src/` ausgeführt werden.
+Um nun die Datenbank zu installieren muss im MS-SQL Management Studio das SQL-Skript 'tables.sql' im Ordner `src/` ausgeführt werden.
+
+Danach können die Daten der Tabellen eingefügt werden. Die befinden sich alle im Ordner `src/data`. Für jede Tabelle gibt es eine zugehörige `.csv`-Datei.
