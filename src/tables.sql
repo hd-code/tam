@@ -25,9 +25,8 @@ CREATE TABLE address (
 ,   zip     char(5)     NOT NULL
 ,   city    varchar(50) NOT NULL
 ,   strNo   varchar(50) NOT NULL
-,   state   char(2)     NOT NULL    -- CHECK(state IN ('AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY'))
+,   state   tinyint     NOT NULL    -- FOREIGN KEY REFERENCES state(id)
 );
---> states auslagern in separate Tabelle ???
 
 CREATE TABLE allergen (
     id      int         NOT NULL    PRIMARY KEY IDENTITY(1,1)
@@ -42,6 +41,8 @@ CREATE TABLE contact (
 ,   mail    varchar(100)    NOT NULL
 );
 
+-- FIXME: ist das Attribut 'id' so okay? gibt es da eine Bildungsvorschrift für?
+-- das Feld 'yDiscount', ist das so okay?
 CREATE TABLE customer (
     id          int             NOT NULL    PRIMARY KEY IDENTITY(1,1)
 ,   no          char(9)         NOT NULL    CHECK(no LIKE '[A-Z][A-Z]-[A-Z][A-Z]-[0-9][0-9][0-9]')
@@ -50,10 +51,9 @@ CREATE TABLE customer (
 ,   billAddress int             NOT NULL                -- FOREIGN KEY REFERENCES address(id)
 ,   shipAddress int                                     -- FOREIGN KEY REFERENCES address(id)
 ,   rating      int             NOT NULL    DEFAULT 3   -- FOREIGN KEY REFERENCES rating(id)
-,   creditlimit decimal(6,2)    NOT NULL    DEFAULT 500
+,   creditLimit decimal(6,2)    NOT NULL    DEFAULT 500
 ,   yDiscount   int                         CHECK(yDiscount BETWEEN 0 AND 100)
 );
---> FRAGE: Kundennummer -> anstatt id ???
 
 CREATE TABLE department (
     id      int         PRIMARY KEY
@@ -75,7 +75,7 @@ CREATE TABLE empHistory (
 );
 
 CREATE TABLE employee (
-    id          int             NOT NULL    PRIMARY KEY IDENTITY(1,1)
+    id          int             NOT NULL    PRIMARY KEY -- IDENTITY(1,1) -- spezielle Bildungsvorschrift!
 ,   fname       varchar(30)     NOT NULL
 ,   lname       varchar(50)     NOT NULL
 ,   email       varchar(100)    NOT NULL    UNIQUE  DEFAULT 'f.lname@tam.com'
@@ -83,7 +83,6 @@ CREATE TABLE employee (
 ,   dob         date            NOT NULL
 ,   address     int             NOT NULL    -- FOREIGN KEY REFERENCES address(id)
 );
---> auto increment  für id ??
 
 CREATE TABLE job (
     id          int         PRIMARY KEY   IDENTITY(1,1)
@@ -101,40 +100,10 @@ CREATE TABLE leavetime (
 
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
--- TODO: PH checken nach Attributen --------------------------------------------
-CREATE TABLE [order] (
-    id                  int         NOT NULL    PRIMARY KEY IDENTITY(1,1)
-,   customer            int         NOT NULL    -- FOREIGN KEY REFERENCES customer(id)
-,   no                  char(24)    NOT NULL    -- Bestellnummer
---> CHECK constraint???
-,   date                datetime    NOT NULL    DEFAULT CURRENT_TIMESTAMP
-,   billAddress         int         NOT NULL    -- FOREIGN KEY REFERENCES address(id)
-,   shipAddress         int                     -- FOREIGN KEY REFERENCES address(id)
-,   customerDiscount    int -- Der yDiscount vom Customer ???
-,   specDiscount        int -- Spezialrabett nur für diese Bestellung ???
--- Payment ???
-);
-
-CREATE TABLE payment (
-    id          int         NOT NULL    PRIMARY KEY IDENTITY(1,1)
-,   [order]     int         NOT NULL    FOREIGN KEY REFERENCES [order](id)
-,   method      varchar(10) NOT NULL    CHECK(method IN ('Vorkasse','Rechnung'))
-,   deadline    date        NOT NULL
-,   date        date
-,   status      int         NOT NULL    CHECK(status BETWEEN 1 AND 4)
-);
---> status??? selbst berechenen??  oder nur flag,  ausgelagerte tabelle ??
-
 --------------------------------------------------------------------------------
-CREATE TABLE shipping (
-    id      int         NOT NULL    PRIMARY KEY IDENTITY(1,1)
-,   [order] int         NOT NULL    FOREIGN KEY REFERENCES [order](id)
-,   date    date    
-,   shipper varchar(50) NOT NULL
-,   no      varchar(20) NOT NULL
-,   price   decimal(6,2) NOT NULL
-);
--- Sollen mehrere Shippings für eine Order möglich sein ??? */
+-- FIXME: Dieser ganze Bereich muss nochmal überdacht und bearbeitet werden!!!
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 
 /*
@@ -157,9 +126,43 @@ o evtl. Sonderrabatt
 o Zahlweise
 o Datum des Zahlungseingangs o Zahl- bzw. Mahnstatus
 */
+
+CREATE TABLE [order] (
+    id                  int         NOT NULL    PRIMARY KEY IDENTITY(1,1)
+,   customer            int         NOT NULL    -- FOREIGN KEY REFERENCES customer(id)
+,   no                  char(24)    NOT NULL    -- Bestellnummer
+--> CHECK constraint???
+,   date                datetime    NOT NULL    DEFAULT CURRENT_TIMESTAMP
+,   billAddress         int         NOT NULL    -- FOREIGN KEY REFERENCES address(id)
+,   shipAddress         int                     -- FOREIGN KEY REFERENCES address(id)
+,   customerDiscount    int -- Der yDiscount vom Customer ???
+,   specDiscount        int -- Spezialrabett nur für diese Bestellung ???
+-- Payment ???
+);
+
+CREATE TABLE payment (
+    id          int         NOT NULL    PRIMARY KEY IDENTITY(1,1)
+,   [order]     int         NOT NULL    FOREIGN KEY REFERENCES [order](id)
+,   method      varchar(10) NOT NULL    CHECK(method IN ('Vorkasse','Rechnung'))
+,   deadline    date        NOT NULL
+,   date        date
+,   status      int         NOT NULL    CHECK(status BETWEEN 1 AND 4)
+);
+--> status??? selbst berechenen??  oder nur flag,  ausgelagerte tabelle ??
+-- check constraint ???
+
 --------------------------------------------------------------------------------
+CREATE TABLE shipping (
+    id      int         NOT NULL    PRIMARY KEY IDENTITY(1,1)
+,   [order] int         NOT NULL    FOREIGN KEY REFERENCES [order](id)
+,   date    date    
+,   shipper varchar(50) NOT NULL
+,   no      varchar(20) NOT NULL
+,   price   decimal(6,2) NOT NULL
+);
+-- Sollen mehrere Shippings für eine Order möglich sein ??? */
 --------------------------------------------------------------------------------
---------------------------------------------------------------------------------
+
 
 CREATE TABLE orderItems (
     [order]     int             NOT NULL    -- FOREIGN KEY REFERENCES [order](id)
@@ -171,7 +174,14 @@ CREATE TABLE orderItems (
 
 ,   PRIMARY KEY ([order],product)
 );
---> itemNo   -> no ???
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 CREATE TABLE prodCat (
     id          int         NOT NULL    PRIMARY KEY     IDENTITY(1,1)
@@ -186,6 +196,7 @@ CREATE TABLE prodGroup (
 ,   tax     int         NOT NULL
 );
 
+-- FIXME: gibt es wirklich nur einen Vendor pro Produkt?
 CREATE TABLE product (
     id          int             NOT NULL    PRIMARY KEY IDENTITY(1,1)
 ,   descrip     varchar(50)     NOT NULL        
@@ -204,11 +215,10 @@ CREATE TABLE productAllergen (
 );
 
 CREATE TABLE purchase (
-    id          int     NOT NULL    PRIMARY KEY IDENTITY(1,1)
-,   date        date    NOT NULL    -- Bestelldatum
-,   arrivedOn   date                -- Wareneingangsdatum
+    id      int     NOT NULL    PRIMARY KEY IDENTITY(1,1)
+,   date    date    NOT NULL    -- Bestelldatum
+,   arrival date                -- Wareneingangsdatum
 );
---> arrivedOn  besserer Name ???
 
 CREATE TABLE purchItems (
     purchase    int             NOT NULL    -- FOREIGN KEY REFERENCES purchase(id)
@@ -219,7 +229,6 @@ CREATE TABLE purchItems (
 
 ,   PRIMARY KEY (purchase,product)
 );
---> itemNo steht nicht im PH !!!!
 
 CREATE TABLE ranking (
     id      int NOT NULL    PRIMARY KEY IDENTITY(1,1)
@@ -240,6 +249,15 @@ CREATE TABLE salgrade (
 ,   hisal   decimal(7,2)
 );
 
+-- TODO: Daten dieser Tabelle von einer öffentlichen API abfragen?
+CREATE TABLE state (
+    id      tinyint     PRIMARY KEY     IDENTITY(1,1)
+,   abbr    char(2)     NOT NULL
+,   name    varchar(20) NOT NULL
+,   capital varchar(20) NOT NULL
+,   since   int
+);
+
 CREATE TABLE vendor (
     id          int             NOT NULL    PRIMARY KEY     IDENTITY(1,1)
 ,   name        varchar(50)     NOT NULL
@@ -248,17 +266,20 @@ CREATE TABLE vendor (
 ,   createdAt   datetime        NOT NULL    DEFAULT CURRENT_TIMESTAMP
 );
 
+-- FIXME: es fehlt noch die Erfassung des minStock. Diese könnte sinnvoller sein
+--       in der Tabelle Products!
 CREATE TABLE warehouse (
     id          int     NOT NULL    PRIMARY KEY IDENTITY(1,1)
 ,   product     int     NOT NULL    -- FOREIGN KEY REFERENCES product(id)    
 ,   stock       int     NOT NULL      
 ,   bestBefore  date                --   Verbrauchsdatum, nur für FOOD-Produkte
 );
---> minStock ???   id/no id ????
 
 GO -----------------------------------------------------------------------------
 
 ALTER TABLE account         ADD FOREIGN KEY (name)        REFERENCES employee(email);
+
+ALTER TABLE address         ADD FOREIGN KEY (state)       REFERENCES state(id);
 
 ALTER TABLE customer        ADD FOREIGN KEY (rating)      REFERENCES rating(id);
 ALTER TABLE customer        ADD FOREIGN KEY (contact)     REFERENCES contact(id);
@@ -301,42 +322,3 @@ ALTER TABLE vendor          ADD FOREIGN KEY (contact)     REFERENCES contact(id)
 ALTER TABLE warehouse       ADD FOREIGN KEY (product)     REFERENCES product(id);
 
 GO -----------------------------------------------------------------------------
-
-/*
-
-Customer Rating: DEFAULT poor
-
-Zahlung pünktlich -> excellent
-vor der ersten Mahnung -> good
-danach -> poor
-
-
-
-
-Kreditlimit (25% des Vorjahresumsatzes, mindestens 500$, gültig für
-ein Jahr) mit Höhe und Gültigkeitszeitraum, Standardwert 500$ wird
-auch für Neukunden gesetzt
-o Kunden mit einem Jahresumsatz ab 20.000 $ (immer gerechnet vom
-1.1. -31.12. eines Jahres) erhalten für das gesamte Folgejahr einen
-Zusatzrabatt von 1%, oder 2% ab einem Jahresumsatz von 50.000$.
-
-Bildungsvorschrift für die Bestellnummer: Bestelldatum-fortlaufende
-Nummer für die Bestellungen des Kunden im laufenden Jahr-
-Kundennummer  JJJJMMTT-XXX-Kundennummer
-
-Für Bestellungen gilt folgende Staffelung beim Mengenrabatt: ab
-1001%, ab 5002%, ab 10005%
-
-Zahlweise: erlaubte Werte Rechnung, Vorkasse,
-o abhängig vom aktuellen Kundenrating  poor (Vorkasse), good/excellent (Rechnung) und
-o vom KreditlimitRechnungssumme > Kreditlimit (Vorkasse), ansonsten Rechnung, wenn Rating es erlaubt. Rating wiegt schwerer als Kreditlimit.
-
-Sonderrabatte können nur die Kundenbetreuer (bzw. deren Vertreter) gewähren, falls sich durch Lieferengpässe der Versand der Bestellung verzögert (1% Rabatt möglich)
-
-Datum des Zahlungseingangs sowie Zahl- bzw. Mahnstatus wird vom Kundenbetreuer (bzw. dessen Vertreter) später ergänzt, sobald die Information vom externen Dienstleister eingegangen ist.
-
-Für Zahl- bzw. Mahnstatus sollen folgende Informationen kodiert werden: 1-open (direkt nach Versand), 2-paid on time (Zahlungseingang vor Erreichen des Zahlungsziels), 3-delayed (Zahlungseingang nach Zahlungsziel), 4-reminded (Zahlungseingang erst nach Mahnung)
-
-Zahlungsziel beträgt 14 Tage ab Versanddatum
-
-*/

@@ -1,0 +1,51 @@
+id;abbr;name;capital;since
+1;AL;Alabama;Montgomery;1819
+2;AK;Alaska;Juneau;1959
+3;AZ;Arizona;Phoenix;1912
+4;AR;Arkansas;Little Rock;1836
+5;CA;Kalifornien;Sacramento;1850
+6;CO;Colorado;Denver;1876
+7;CT;Connecticut;Hartford;1788
+8;DE;Delaware;Dover;1787
+9;FL;Florida;Tallahassee;1845
+10;GA;Georgia;Atlanta;1788
+11;HI;Hawaii;Honolulu;1959
+12;ID;Idaho;Boise;1890
+13;IL;Illinois;Springfield;1818
+14;IN;Indiana;Indianapolis;1816
+15;IA;Iowa;Des Moines;1846
+16;KS;Kansas;Topeka;1861
+17;KY;Kentucky;Frankfort;1792
+18;LA;Louisiana;Baton Rouge;1812
+19;ME;Maine;Augusta;1820
+20;MD;Maryland;Annapolis;1788
+21;MA;Massachusetts;Boston;1788
+22;MI;Michigan;Lansing;1837
+23;MN;Minnesota;Saint Paul;1858
+24;MS;Mississippi;Jackson;1817
+25;MO;Missouri;Jefferson City;1821
+26;MT;Montana;Helena;1889
+27;NE;Nebraska;Lincoln;1867
+28;NV;Nevada;Carson City;1864
+29;NH;New Hampshire;Concord;1788
+30;NJ;New Jersey;Trenton;1787
+31;NM;New Mexico;Santa Fe;1912
+32;NY;New York;Albany;1788
+33;NC;North Carolina;Raleigh;1789
+34;ND;North Dakota;Bismarck;1889
+35;OH;Ohio;Columbus;1803
+36;OK;Oklahoma;Oklahoma City;1907
+37;OR;Oregon;Salem;1859
+38;PA;Pennsylvania;Harrisburg;1787
+39;RI;Rhode Island;Providence;1790
+40;SC;South Carolina;Columbia;1788
+41;SD;South Dakota;Pierre;1889
+42;TN;Tennessee;Nashville;1796
+43;TX;Texas;Austin;1845
+44;UT;Utah;Salt Lake City;1896
+45;VT;Vermont;Montpelier;1791
+46;VA;Virginia;Richmond;1788
+47;WA;Washington;Olympia;1889
+48;WV;West Virginia;Charleston;1863
+49;WI;Wisconsin;Madison;1848
+50;WY;Wyoming;Cheyenne;1890
