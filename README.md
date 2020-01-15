@@ -35,7 +35,7 @@ Dazu bitte die Konsole öffnen und folgendes ausführen:
 
 ```bash
 # 1. dieses Repo clonen
-git clone https://source.ai.fh-erfurt.de/ha9384dr/tam-mssql.git
+git clone https://github.com/hd-code/tam.git
 
 # 2. in den Ordner des Projektes wechseln
 cd tam-mssql
