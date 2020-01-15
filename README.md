@@ -38,7 +38,7 @@ Dazu bitte die Konsole öffnen und folgendes ausführen:
 git clone https://github.com/hd-code/tam.git
 
 # 2. in den Ordner des Projektes wechseln
-cd tam-mssql
+cd tam
 
 # 3. Docker Image mit dem Namen 'tam' bauen, mittels:
 docker build -t tam .
